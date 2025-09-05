@@ -1,0 +1,36 @@
+{% extends "hospital_app/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="text-center mb-4">Hospital Management Dashboard</h1>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card text-center shadow">
+            <div class="card-body">
+                <h5 class="card-title">Doctors</h5>
+                <p class="display-6">{{ doctors_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center shadow">
+            <div class="card-body">
+                <h5 class="card-title">Patients</h5>
+                <p class="display-6">{{ patients_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center shadow">
+            <div class="card-body">
+                <h5 class="card-title">Appointments</h5>
+                <p class="display-6">{{ appointments_count }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
