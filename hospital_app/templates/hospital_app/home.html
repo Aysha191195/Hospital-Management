@@ -1,36 +1,51 @@
 {% extends "hospital_app/base.html" %}
-
 {% block title %}Dashboard{% endblock %}
-
 {% block content %}
-<h1 class="text-center mb-4">Hospital Management Dashboard</h1>
+<h1 class="mb-4">Hospital Dashboard</h1>
 
 <div class="row g-4">
-    <div class="col-md-4">
-        <div class="card text-center shadow">
-            <div class="card-body">
-                <h5 class="card-title">Doctors</h5>
-                <p class="display-6">{{ doctors_count }}</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card text-center shadow">
-            <div class="card-body">
-                <h5 class="card-title">Patients</h5>
-                <p class="display-6">{{ patients_count }}</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card text-center shadow">
-            <div class="card-body">
-                <h5 class="card-title">Appointments</h5>
-                <p class="display-6">{{ appointments_count }}</p>
-            </div>
-        </div>
-    </div>
+  <div class="col-md-3"><div class="card p-3 text-center shadow-sm"><h3>{{ patients_count }}</h3><p>Patients</p></div></div>
+  <div class="col-md-3"><div class="card p-3 text-center shadow-sm"><h3>{{ doctors_count }}</h3><p>Doctors</p></div></div>
+  <div class="col-md-3"><div class="card p-3 text-center shadow-sm"><h3>{{ appointments_count }}</h3><p>Appointments</p></div></div>
+  <div class="col-md-3"><div class="card p-3 text-center shadow-sm"><h3>{{ total_revenue }}</h3><p>Total Revenue</p></div></div>
 </div>
+
+<div class="row mt-4">
+  <div class="col-md-6">
+    <div class="card p-3 shadow-sm">
+      <h5>Appointments per Doctor</h5>
+      <canvas id="docChart"></canvas>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card p-3 shadow-sm">
+      <h5>Appointments — Last 7 days</h5>
+      <canvas id="dailyChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const docLabels = {{ doc_labels|safe }};
+  const docCounts = {{ doc_counts|safe }};
+  const ctxDoc = document.getElementById('docChart').getContext('2d');
+  new Chart(ctxDoc, {
+    type: 'bar',
+    data: {
+      labels: docLabels,
+      datasets: [{ label: 'Appointments', data: docCounts }]
+    },
+    options: { responsive: true }
+  });
+
+  const dates = {{ dates|safe }};
+  const dailyCounts = {{ daily_counts|safe }};
+  const ctxDaily = document.getElementById('dailyChart').getContext('2d');
+  new Chart(ctxDaily, {
+    type: 'line',
+    data: { labels: dates, datasets: [{ label: 'Appointments', data: dailyCounts, fill:false }] },
+    options: { responsive: true }
+  });
+</script>
 {% endblock %}
