@@ -8,7 +8,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
 
     # dashboard / home
-    path('', views.home, name='home'),
+    path('', views.home_view, name='home'),
 
     # doctors
     path('doctors/', views.doctor_list, name='doctor_list'),
@@ -31,4 +31,9 @@ urlpatterns = [
     # treatments & bills (optional management pages — basic create/edit could be added similarly)
     path('treatments/add/', views.add_treatment, name='add_treatment'),
     path('bills/add/', views.add_bill, name='add_bill'),
+
+    # Login.Register
+    path("register/", views.register_view, name="register"),
+    path("login/", views.login_view, name="login"),
+    path("logout/", views.logout_view, name="logout"),
 ]
