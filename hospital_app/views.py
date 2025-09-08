@@ -26,7 +26,9 @@ from django.db.models import Count, Sum
 from django.utils.timezone import now, timedelta
 
 from .models import Doctor, Patient, Appointment, Treatment, Bill
-from .forms import DoctorForm, PatientForm, AppointmentForm, TreatmentForm, BillForm
+from .forms import DoctorForm, PatientForm, AppointmentForm, TreatmentForm, BillForm,SimpleRegisterForm
+import json
+
 
 # ---------------- Auth ----------------
 def register_view(request):
@@ -57,55 +59,33 @@ def logout_view(request):
 
 
 # ---------------- Dashboard (home) ----------------
-@login_required
-def home(request):
-    # Counts
+from django.db.models import Count, Sum
+from django.db.models.functions import TruncDate
+from django.utils.timezone import now, make_aware
+import datetime
+
+def home_view(request):
     patients_count = Patient.objects.count()
     doctors_count = Doctor.objects.count()
     appointments_count = Appointment.objects.count()
-    total_revenue = Bill.objects.aggregate(total=Sum('total_amount'))['total'] or 0
-    pending_bills = Bill.objects.filter(payment_status='Pending').count()
+    total_revenue = 0  # Add actual sum if you have a Bill model
 
-    # Appointments per doctor (bar chart)
-    appt_per_doc_qs = (
-        Appointment.objects.values('doctor__name')
-        .annotate(count=Count('id'))
-        .order_by('-count')
-    )
-    doc_labels = [item['doctor__name'] for item in appt_per_doc_qs]
-    doc_counts = [item['count'] for item in appt_per_doc_qs]
+    # Example chart data
+    doc_labels = [doctor.name for doctor in Doctor.objects.all()]
+    doc_counts = [Appointment.objects.filter(doctor=doctor).count() for doctor in Doctor.objects.all()]
 
-    # Appointments last 7 days (line chart)
-    today = now().date()
-    start_date = today - timedelta(days=6)
-    daily_qs = (
-        Appointment.objects
-        .filter(appointment_date__date__range=[start_date, today])
-        .annotate(day=TruncDate('appointment_date'))
-        .values('day')
-        .annotate(count=Count('id'))
-        .order_by('day')
-    )
-
-    # Ensure all 7 days are present
-    dates = []
-    daily_counts = []
-    daily_map = {x['day'].strftime('%Y-%m-%d'): x['count'] for x in daily_qs}
-    for i in range(7):
-        d = start_date + timedelta(days=i)
-        dates.append(d.strftime('%Y-%m-%d'))
-        daily_counts.append(daily_map.get(d.strftime('%Y-%m-%d'), 0))
+    dates = ['2025-09-01','2025-09-02','2025-09-03','2025-09-04','2025-09-05','2025-09-06','2025-09-07']
+    daily_counts = [5,3,6,4,7,2,3]  # Example counts
 
     context = {
         'patients_count': patients_count,
         'doctors_count': doctors_count,
         'appointments_count': appointments_count,
         'total_revenue': total_revenue,
-        'pending_bills': pending_bills,
-        'doc_labels': doc_labels,
-        'doc_counts': doc_counts,
-        'dates': dates,
-        'daily_counts': daily_counts,
+        'doc_labels': json.dumps(doc_labels),
+        'doc_counts': json.dumps(doc_counts),
+        'dates': json.dumps(dates),
+        'daily_counts': json.dumps(daily_counts),
     }
     return render(request, 'hospital_app/home.html', context)
 
@@ -257,3 +237,38 @@ def add_bill(request):
     else:
         form = BillForm()
     return render(request, 'hospital_app/add_bill.html', {'form': form})
+
+# Register View
+def register_view(request):
+    if request.method == 'POST':
+        form = SimpleRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            return redirect('login')  # Redirect to login page after registration
+    else:
+        form = SimpleRegisterForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+
+# Login View
+def login_view(request):
+    if request.method == "POST":
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect("home")
+    else:
+        form = AuthenticationForm()
+    return render(request, "registration/login.html", {"form": form})
+    
+
+
+# Logout View
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect("login")
+
