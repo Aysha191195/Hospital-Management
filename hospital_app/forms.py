@@ -1,5 +1,6 @@
 from django import forms
 from .models import Doctor, Patient, Appointment, Treatment, Bill
+from django.contrib.auth.models import User
 
 class DoctorForm(forms.ModelForm):
     class Meta:
@@ -31,3 +32,10 @@ class BillForm(forms.ModelForm):
     class Meta:
         model = Bill
         fields = ['appointment','total_amount','payment_status']
+
+class SimpleRegisterForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
