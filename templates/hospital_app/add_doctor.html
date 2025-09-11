@@ -1,11 +1,41 @@
 {% extends "hospital_app/base.html" %}
-{% block title %}Add Doctor{% endblock %}
+
 {% block content %}
-<h2>Add Doctor</h2>
-<form method="post" class="card p-4 bg-white shadow-sm">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button class="btn btn-primary" type="submit">Save</button>
-  <a href="{% url 'doctor_list' %}" class="btn btn-secondary">Cancel</a>
-</form>
+<div class="container mt-5" style="max-width: 600px;">
+    <h2 class="mb-4">{{ form.instance.pk|yesno:"Edit Doctor,Add Doctor" }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Doctor Name -->
+        <div class="mb-3">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            {% if form.name.errors %}
+                <div class="text-danger mt-1">{{ form.name.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Specialization -->
+        <div class="mb-3">
+            {{ form.specialization.label_tag }}
+            {{ form.specialization }}
+            {% if form.specialization.errors %}
+                <div class="text-danger mt-1">{{ form.specialization.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Phone Number -->
+        <div class="mb-3">
+            {{ form.phone.label_tag }}
+            {{ form.phone }}
+            {% if form.phone.errors %}
+                <div class="text-danger mt-1">{{ form.phone.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'doctor_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
 {% endblock %}
