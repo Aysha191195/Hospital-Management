@@ -1,21 +1,29 @@
 {% extends "hospital_app/base.html" %}
 
-{% block title %}Login{% endblock %}
-
 {% block content %}
-<div class="row justify-content-center mt-5">
-  <div class="col-md-4">
-    <div class="card shadow-sm p-4">
-      <h3 class="text-center mb-4">Login</h3>
-      <form method="post">
+<div class="container mt-5" style="max-width: 400px;">
+    <h2 class="mb-4 text-center">Login</h2>
+
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Invalid login:</strong> Please check your username and password.
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
-        {{ form.as_p }}
+        
+        <div class="mb-3">
+            <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+            {{ form.username }}
+        </div>
+        
+        <div class="mb-3">
+            <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+            {{ form.password }}
+        </div>
+
         <button type="submit" class="btn btn-primary w-100">Login</button>
-      </form>
-      <p class="text-center mt-3">
-        Don’t have an account? <a href="{% url 'register' %}">Register</a>
-      </p>
-    </div>
-  </div>
+    </form>
 </div>
 {% endblock %}

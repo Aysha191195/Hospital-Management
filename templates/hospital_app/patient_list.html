@@ -15,7 +15,7 @@
 <tr>
   <td>{{ p.name }}</td>
   <td>{{ p.gender }}</td>
-  <td>{{ p.dob }}</td>
+  <td>{{ p.dob|date:"d M, Y" }}</td>
   <td>{{ p.phone }}</td>
   <td>
     <a href="{% url 'edit_patient' p.id %}" class="btn btn-warning btn-sm">Edit</a>
