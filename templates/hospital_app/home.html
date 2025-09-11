@@ -2,29 +2,29 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Hospital Dashboard</h1>
+<h1 class="mb-4">Hospital Management Dashboard</h1>
 
 <div class="row g-4">
   <div class="col-md-3">
-    <div class="card p-3 text-center shadow-sm">
+    <div class="card p-3 text-center shadow-sm bg-primary text-white">
       <h3>{{ patients_count }}</h3>
       <p>Patients</p>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card p-3 text-center shadow-sm">
+    <div class="card p-3 text-center shadow-sm bg-success text-white">
       <h3>{{ doctors_count }}</h3>
       <p>Doctors</p>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card p-3 text-center shadow-sm">
+    <div class="card p-3 text-center shadow-sm bg-warning text-dark">
       <h3>{{ appointments_count }}</h3>
       <p>Appointments</p>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card p-3 text-center shadow-sm">
+    <div class="card p-3 text-center shadow-sm bg-danger text-white">
       <h3>{{ total_revenue }}</h3>
       <p>Total Revenue</p>
     </div>
@@ -46,6 +46,28 @@
   </div>
 </div>
 
+<!-- Charts Row 2 -->
+<div class="row mt-4">
+  <div class="col-md-4">
+    <div class="card p-3 shadow-sm">
+      <h5>Payment Status</h5>
+      <canvas id="paymentChart"></canvas>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3 shadow-sm">
+      <h5>Treatments</h5>
+      <canvas id="treatmentChart"></canvas>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3 shadow-sm">
+      <h5>Patients by Gender</h5>
+      <canvas id="genderChart"></canvas>
+    </div>
+  </div>
+</div>
+
 <!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -54,46 +76,93 @@
 {{ doc_counts|json_script:"docCounts" }}
 {{ dates|json_script:"dates" }}
 {{ daily_counts|json_script:"dailyCounts" }}
+{{ paid_count|json_script:"paidCount" }}
+{{ pending_count|json_script:"pendingCount" }}
+{{ treatment_labels|json_script:"treatmentLabels" }}
+{{ treatment_counts|json_script:"treatmentCounts" }}
+{{ male_count|json_script:"maleCount" }}
+{{ female_count|json_script:"femaleCount" }}
+{{ other_count|json_script:"otherCount" }}
 
 <script>
-const docLabels = JSON.parse(document.getElementById('docLabels').textContent);
-const docCounts = JSON.parse(document.getElementById('docCounts').textContent);
-const dates = JSON.parse(document.getElementById('dates').textContent);
-const dailyCounts = JSON.parse(document.getElementById('dailyCounts').textContent);
+  // Parse JSON data safely
+  const docLabels = JSON.parse(document.getElementById('docLabels').textContent);
+  const docCounts = JSON.parse(document.getElementById('docCounts').textContent);
+  const dates = JSON.parse(document.getElementById('dates').textContent);
+  const dailyCounts = JSON.parse(document.getElementById('dailyCounts').textContent);
+  const paidCount = JSON.parse(document.getElementById('paidCount').textContent);
+  const pendingCount = JSON.parse(document.getElementById('pendingCount').textContent);
+  const treatmentLabels = JSON.parse(document.getElementById('treatmentLabels').textContent);
+  const treatmentCounts = JSON.parse(document.getElementById('treatmentCounts').textContent);
+  const maleCount = JSON.parse(document.getElementById('maleCount').textContent);
+  const femaleCount = JSON.parse(document.getElementById('femaleCount').textContent);
+  const otherCount = JSON.parse(document.getElementById('otherCount').textContent);
 
-// Appointments per Doctor (Bar Chart)
-const ctxDoc = document.getElementById('docChart').getContext('2d');
-new Chart(ctxDoc, {
+  // Bar Chart: Appointments per Doctor
+  new Chart(document.getElementById('docChart'), {
     type: 'bar',
     data: {
-        labels: docLabels,
-        datasets: [{
-            label: 'Appointments',
-            data: docCounts,
-            backgroundColor: 'rgba(54, 162, 235, 0.7)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-        }]
-    },
-    options: { responsive: true }
-});
+      labels: docLabels,
+      datasets: [{
+        label: 'Appointments',
+        data: docCounts,
+        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+      }]
+    }
+  });
 
-// Appointments last 7 days (Line Chart)
-const ctxDaily = document.getElementById('dailyChart').getContext('2d');
-new Chart(ctxDaily, {
+  // Line Chart: Appointments Last 7 Days
+  new Chart(document.getElementById('dailyChart'), {
     type: 'line',
     data: {
-        labels: dates,
-        datasets: [{
-            label: 'Appointments',
-            data: dailyCounts,
-            borderColor: 'rgba(255, 99, 132, 1)',
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            fill: false,
-            tension: 0.1
-        }]
-    },
-    options: { responsive: true }
-});
+      labels: dates,
+      datasets: [{
+        label: 'Appointments',
+        data: dailyCounts,
+        borderColor: 'rgba(255, 99, 132, 0.9)',
+        fill: false
+      }]
+    }
+  });
+
+  // Pie Chart: Payment Status
+  new Chart(document.getElementById('paymentChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Paid', 'Pending'],
+      datasets: [{
+        data: [paidCount, pendingCount],
+        backgroundColor: ['#28a745', '#ffc107']
+      }]
+    }
+  });
+
+  // Doughnut Chart: Treatments
+  new Chart(document.getElementById('treatmentChart'), {
+    type: 'doughnut',
+    data: {
+      labels: treatmentLabels,
+      datasets: [{
+        data: treatmentCounts,
+        backgroundColor: ['#007bff','#6610f2','#17a2b8','#fd7e14','#20c997','#dc3545']
+      }]
+    }
+  });
+
+  // Polar Area Chart: Patients by Gender
+  new Chart(document.getElementById('genderChart'), {
+    type: 'polarArea',
+    data: {
+      labels: ['Male', 'Female', 'Other'],
+      datasets: [{
+        data: [maleCount, femaleCount, otherCount],
+        backgroundColor: ['#007bff', '#e83e8c', '#6c757d']
+      }]
+    }
+  });
 </script>
-{% endblock %}
+{% endblock %} 
+
+
+
+
